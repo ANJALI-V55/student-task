@@ -2,17 +2,16 @@ const taskInput = document.getElementById('task');
 const addBtn = document.getElementById('addBtn');
 const list = document.getElementById('list');
 
-// 1. Load tasks from the server
 async function loadTasks() {
     try {
-        const res = await fetch('/api/tasks');
+        const res = await fetch("/api/tasks");
         const tasks = await res.json();
         
-        list.innerHTML = ""; // Clear current list
+        list.innerHTML = ""; 
         tasks.forEach(task => {
             const li = document.createElement("li");
-            // This works whether 'task' is a string or an object with .text
-            li.textContent = typeof task === 'object' ? task.text : task;
+            // Displays the task whether it's a string or object
+            li.textContent = typeof task === 'object' ? (task.text || task.task) : task;
             list.appendChild(li);
         });
     } catch (err) {
@@ -20,7 +19,6 @@ async function loadTasks() {
     }
 }
 
-// 2. Add a new task
 addBtn.addEventListener("click", async () => {
     const text = taskInput.value.trim();
     if (!text) return;
@@ -29,15 +27,14 @@ addBtn.addEventListener("click", async () => {
         await fetch("/api/tasks", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ task: text }) // Match the backend 'req.body.task'
+            body: JSON.stringify({ task: text }) // Matches index.js
         });
 
         taskInput.value = "";
-        loadTasks(); // Refresh list immediately
+        await loadTasks(); 
     } catch (err) {
         console.error("Error adding task:", err);
     }
 });
 
-// Initial load when page opens
 loadTasks();
