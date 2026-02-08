@@ -22,5 +22,5 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run app check
-        run: node -e "console.log('Build successful')"
+      - name: Run automated tests
+        run: npm test
