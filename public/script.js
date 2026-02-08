@@ -1,33 +1,43 @@
-const list = document.getElementById("list");
-const addBtn = document.getElementById("addBtn");
-const taskInput = document.getElementById("task");
+const taskInput = document.getElementById('task');
+const addBtn = document.getElementById('addBtn');
+const list = document.getElementById('list');
 
-function loadTasks() {
-  fetch("/tasks")
-    .then(res => res.json())
-    .then(tasks => {
-      list.innerHTML = "";
-      tasks.forEach(t => {
-        const li = document.createElement("li");
-        li.textContent = t.text;
-        list.appendChild(li);
-      });
-    })
-    .catch(err => console.error(err));
+// 1. Load tasks from the server
+async function loadTasks() {
+    try {
+        const res = await fetch('/api/tasks');
+        const tasks = await res.json();
+        
+        list.innerHTML = ""; // Clear current list
+        tasks.forEach(task => {
+            const li = document.createElement("li");
+            // This works whether 'task' is a string or an object with .text
+            li.textContent = typeof task === 'object' ? task.text : task;
+            list.appendChild(li);
+        });
+    } catch (err) {
+        console.error("Error loading tasks:", err);
+    }
 }
 
-addBtn.addEventListener("click", () => {
-  const text = taskInput.value.trim();
-  if (!text) return;
+// 2. Add a new task
+addBtn.addEventListener("click", async () => {
+    const text = taskInput.value.trim();
+    if (!text) return;
 
-  fetch("/tasks", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text })
-  }).then(() => {
-    taskInput.value = "";
-    loadTasks();
-  });
+    try {
+        await fetch("/api/tasks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ task: text }) // Match the backend 'req.body.task'
+        });
+
+        taskInput.value = "";
+        loadTasks(); // Refresh list immediately
+    } catch (err) {
+        console.error("Error adding task:", err);
+    }
 });
 
+// Initial load when page opens
 loadTasks();
